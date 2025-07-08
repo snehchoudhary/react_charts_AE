@@ -1,5 +1,6 @@
-import papa from 'papaparse';
-import { useEffect, useState } from 'react';
+// import papa from 'papaparse';
+import React, { useContext, useEffect, useState } from 'react';
+import { CsvContext } from './CsvContext';
 import {Line} from 'react-chartjs-2';
 import annotationPlugin from 'chartjs-plugin-annotation';
 import { Chart as ChartJS , CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
@@ -7,27 +8,29 @@ import { Chart as ChartJS , CategoryScale, LinearScale, PointElement, LineElemen
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, annotationPlugin);
 
 function ACPSP () {
+  const {csvData} = useContext(CsvContext);
   const [chartData, setChartData] = useState({
     datasets: [],
   });
 
   const [chartOptions, setChartOptions] = useState({});
   // Allow user to add threshold values 
-  const [threshold1, setThreshold1] = useState(-1.200);
+  const [threshold1, setThreshold1] = useState(14);
 
   useEffect(() => {
-    papa.parse("/MergeCustomExport.csv", {
-      download: true,
-      header: true,
-      dynamicTyping: true,
-      delimiter: ",",
-      quoteChar: '"',
+    if (csvData.length === 0) return;
+    // papa.parse("/MergeCustomExport.csv", {
+    //   download: true,
+    //   header: true,
+    //   dynamicTyping: true,
+    //   delimiter: ",",
+    //   quoteChar: '"',
 
-      complete: (result) => {
-        console.log('Raw parsed data:', result.data);
+      // complete: (result) => {
+      //   console.log('Raw parsed data:', result.data);
 
         // Filter out rows where either label or data is missing or invalid
-        const filteredData = result.data.filter(
+        const filteredData = csvData.filter(
           (item) =>
             item["VirtualDistance (m)"] !== undefined &&
             item["VirtualDistance (m)"] !== null &&
@@ -76,9 +79,9 @@ function ACPSP () {
         } else {
           console.warn('Labels and data length mismatch');
         }
-         },
-    });
-  }, []);
+        //  },
+    // });
+  }, [csvData]);
 
 
          useEffect (() => {

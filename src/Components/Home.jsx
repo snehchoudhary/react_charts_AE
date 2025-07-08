@@ -1,5 +1,6 @@
-import papa from 'papaparse';
-import { useEffect, useState } from 'react';
+// import papa from 'papaparse';
+import React, {useContext, useEffect, useState } from 'react';
+import { CsvContext } from './CsvContext';
 import {Line} from 'react-chartjs-2';
 import annotationPlugin from 'chartjs-plugin-annotation';
 import { Chart as ChartJS , CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
@@ -7,6 +8,7 @@ import { Chart as ChartJS , CategoryScale, LinearScale, PointElement, LineElemen
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, annotationPlugin);
 
 function Home () {
+  const {csvData} = useContext(CsvContext);
   const [chartData, setChartData] = useState({
     datasets: [],
   });
@@ -14,24 +16,26 @@ function Home () {
   const [chartOptions, setChartOptions] = useState({});
 
   // Allow user to add threshold values 
-  const [threshold1, setThreshold1] = useState(-1.200);
-  const [threshold2, setThreshold2] = useState(-0.850);
+  const [threshold1, setThreshold1] = useState(-0.850);
+  const [threshold2, setThreshold2] = useState(-1.200);
 
   
 
   useEffect(() => {
-    papa.parse("/MergeCustomExport.csv", {
-      download: true,
-      header: true,
-      dynamicTyping: true,
-      delimiter: ",",
-      quoteChar: '"',
 
-      complete: (result) => {
-        console.log('Raw parsed data:', result.data);
+    if (csvData.length === 0) return;
+    // papa.parse("/MergeCustomExport.csv", {
+    //   download: true,
+    //   header: true,
+    //   dynamicTyping: true,
+    //   delimiter: ",",
+    //   quoteChar: '"',
+
+    //   complete: (result) => {
+    //     console.log('Raw parsed data:', result.data);
 
         // Filter out rows where either label or data is missing or invalid
-        const filteredData = result.data.filter(
+        const filteredData = csvData.filter(
           (item) =>
             item["VirtualDistance (m)"] !== undefined &&
             item["VirtualDistance (m)"] !== null &&
@@ -93,9 +97,9 @@ function Home () {
         } else {
           console.warn('Labels and data length mismatch');
         }
-         },
-    });
-  }, []);
+        //  },
+    // });
+  }, [csvData]);
 
 
   // Update annotations lines dynamically
@@ -166,7 +170,7 @@ function Home () {
 
       <div style={{ marginBottom: '1rem'}}>
     <label>
-      Threshold1:
+      threshold1:
       <input type="number"
       value={threshold1}
       onChange={(e) => setThreshold1(Number(e.target.value))} />
@@ -175,7 +179,7 @@ function Home () {
 <br />
 
     <label>
-      Threshold2:
+      threshold2:
       <input type="number"
       value={threshold2}
       onChange={(e) => setThreshold2(Number(e.target.value))} />
